@@ -8,7 +8,7 @@ export function createMiddlewareMetrics(app: router) {
     next: NextFunction,
   ) {
     res.on("finish", () => {
-      app.apiConfig.fileserverHits = app.apiConfig.fileserverHits + 1;
+      app.apiConfig.fileserverHits += 1;
     });
     next();
   };
@@ -26,34 +26,4 @@ export function middlewareLogResponses(
     }
   });
   next();
-}
-
-export function healthHandler(req: Request, res: Response): void {
-  res.set("Content-Type", "text/plain; charset=utf-8");
-  res.send("OK");
-}
-
-export function createMetricsHandler(app: router) {
-  return function metricsHandler(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void {
-    res.set("Content-Type", "text/plain; charset=utf-8");
-    res.send(`Hits ${app.apiConfig.fileserverHits}`);
-    next();
-  };
-}
-
-export function createResetHandler(app: router) {
-  return function resetHandler(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): void {
-    app.apiConfig.fileserverHits = 0;
-    res.set("Content-Type", "text/plain; charset=utf-8");
-    res.send("OK");
-    next();
-  };
 }

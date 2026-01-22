@@ -1,7 +1,7 @@
 export function createMiddlewareMetrics(app) {
     return function middlewareMetricsInc(req, res, next) {
         res.on("finish", () => {
-            app.apiConfig.fileserverHits = app.apiConfig.fileserverHits + 1;
+            app.apiConfig.fileserverHits += 1;
         });
         next();
     };
@@ -21,8 +21,13 @@ export function healthHandler(req, res) {
 }
 export function createMetricsHandler(app) {
     return function metricsHandler(req, res, next) {
-        res.set("Content-Type", "text/plain; charset=utf-8");
-        res.send(`Hits ${app.apiConfig.fileserverHits}`);
+        res.set("Content-Type", "text/html");
+        res.send(`<html>
+  <body>
+    <h1>Welcome, Chirpy Admin</h1>
+    <p>Chirpy has been visited ${app.apiConfig.fileserverHits} times!</p>
+  </body>
+</html>`);
         next();
     };
 }

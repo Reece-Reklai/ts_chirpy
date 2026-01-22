@@ -1,4 +1,5 @@
 import express from "express";
+import { Request, Response, NextFunction } from "express";
 import type { router } from "../config.js";
 import {
   middlewareLogResponses,
@@ -10,6 +11,13 @@ import {
   healthHandler,
 } from "./admin.js";
 import { handlerValidateChirp } from "./api.js";
+
+// encode json back to client
+export function respondWithJSON(res: Response, code: number, payload: any) {
+  res.header("Content-Type", "application/json");
+  const body = JSON.stringify(payload);
+  res.status(code).send(body);
+}
 
 export function registerRoutes(app: router) {
   // Apply the middleware to all routes

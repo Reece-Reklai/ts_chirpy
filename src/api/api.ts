@@ -1,8 +1,17 @@
 import express from "express";
 import { Request, Response, NextFunction } from "express";
+import { respondWithJSON } from "./router.js";
 
-export async function handlerValidateChirp(req: Request, res: Response) {
-  let body = ""; // 1. Initialize
+export function handlerValidateChirp(req: Request, res: Response) {
+  type chirp = {
+    body: string;
+  };
+  type response = {
+    error?: string;
+    valid?: boolean;
+  };
+  let body = "";
+  let payload = {} as response;
 
   // 2. Listen for data events
   req.on("data", (chunk) => {
@@ -12,29 +21,18 @@ export async function handlerValidateChirp(req: Request, res: Response) {
   // 3. Listen for end events
   req.on("end", () => {
     try {
-      const parsedBody = JSON.parse(body);
+      const parsedBody = JSON.parse(body) as chirp;
       if (parsedBody.body.length > 140) {
-        res.status(400).send({ error: "Chirp is too long" });
+        payload.error = "Chirp is too long";
       }
     } catch (error) {
-      res.status(400).send({ error: "Something went wrong" });
+      payload.error = "Something went wrong";
     }
+    if (typeof payload.error === "undefined") {
+      payload.valid = true;
+      respondWithJSON(res, 200, payload);
+      return;
+    }
+    respondWithJSON(res, 400, payload);
   });
-}
-
-// encode json back to client
-async function handlerEncodingJson(req: Request, res: Response) {
-  type responseData = {
-    createdAt: string;
-    ID: number;
-  };
-
-  const respBody: responseData = {
-    createdAt: new Date().toISOString(),
-    ID: 123,
-  };
-
-  res.header("Content-Type", "application/json");
-  const body = JSON.stringify(respBody);
-  res.status(200).send(body);
 }

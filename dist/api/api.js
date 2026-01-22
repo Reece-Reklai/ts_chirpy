@@ -1,5 +1,7 @@
-export async function handlerValidateChirp(req, res) {
-    let body = ""; // 1. Initialize
+import { respondWithJSON } from "./router.js";
+export function handlerValidateChirp(req, res) {
+    let body = "";
+    let payload = {};
     // 2. Listen for data events
     req.on("data", (chunk) => {
         body += chunk;
@@ -8,19 +10,18 @@ export async function handlerValidateChirp(req, res) {
     req.on("end", () => {
         try {
             const parsedBody = JSON.parse(body);
+            if (parsedBody.body.length > 140) {
+                payload.error = "Chirp is too long";
+            }
         }
         catch (error) {
-            res.status(400).send({ error: "Something went wrong" });
+            payload.error = "Something went wrong";
         }
+        if (typeof payload.error === "undefined") {
+            payload.valid = true;
+            respondWithJSON(res, 200, payload);
+            return;
+        }
+        respondWithJSON(res, 400, payload);
     });
-}
-// encode json back to client
-async function handlerEncodingJson(req, res) {
-    const respBody = {
-        createdAt: new Date().toISOString(),
-        ID: 123,
-    };
-    res.header("Content-Type", "application/json");
-    const body = JSON.stringify(respBody);
-    res.status(200).send(body);
 }
